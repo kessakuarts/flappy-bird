@@ -7,40 +7,70 @@ public class Level : MonoBehaviour
 
     private const float PIPE_WIDTH = 8f;
     private const float PIPE_HEAD_HEIGHT = 4f;
-    private const float PIPE_MOVE_SPEED = 10f;
+    private const float PIPE_MOVE_SPEED = 30f;
 
+    private const float PIPE_DESTROY_X_POSITION = -100f;
+    private const float PIPE_SPAWN_X_POSITION = 100f;
 
-    private List<Transform> pipeList;
+    private List<Pipe> pipeList;
+
+    private float pipeSpawnTimer;
+    private float pipeSpawnTimerMax;
 
     private void Awake()
     {
-        pipeList = new List<Transform>();
+        pipeList = new List<Pipe>();
+
+        pipeSpawnTimerMax = 1f;
     }
 
     private void Start()
     {
         //CreatePipe(20f, 50f, true);
         //CreatePipe(20f, 50f, false);
-        CreateGapPipes(50f, 20f, 20f);
+
+        //CreateGapPipes(50f, 20f, 20f);
     }
 
     private void Update()
     {
         HandlePipeMovement();
+        HandlePipeSpawning();
+    }
+
+    private void HandlePipeSpawning()
+    {
+        pipeSpawnTimer -= Time.deltaTime;
+        
+        if (pipeSpawnTimer < 0)
+        {
+            pipeSpawnTimer += pipeSpawnTimerMax;
+            CreateGapPipes(50f, 20f, PIPE_SPAWN_X_POSITION);
+        }
     }
 
     private void HandlePipeMovement()
     {
-        foreach (var pipeTransform in pipeList)
+        for (int i = 0; i < pipeList.Count; i++)
         {
-            pipeTransform.position += new Vector3(-1, 0, 0) * PIPE_MOVE_SPEED * Time.deltaTime;
+            Pipe pipe = pipeList[i];
+            pipe.Move();
+
+            if (pipe.GetXPosition() < PIPE_DESTROY_X_POSITION)
+            {
+                // Destroy pipe
+                pipe.DestroySelf();
+                pipeList.Remove(pipe);
+
+                i--;
+            }
         }
     }
 
     private void CreateGapPipes(float gapY, float gapSize, float xPosition)
     {
-        CreatePipe(gapY - gapSize * .5f, xPosition, true);
-        CreatePipe(CAMERA_ORTHO_SIZE * 2f - gapY - gapSize * .5f, xPosition, false);
+        CreatePipe(xPosition, gapY - gapSize * .5f, true);
+        CreatePipe(xPosition, CAMERA_ORTHO_SIZE * 2f - gapY - gapSize * .5f, false);
     }
 
     private void CreatePipe(float xPosition, float height, bool createBottom)
@@ -56,7 +86,6 @@ public class Level : MonoBehaviour
             pipeHeadYPosition = +CAMERA_ORTHO_SIZE - height + PIPE_HEAD_HEIGHT * .5f;
         }
         pipeHead.position = new Vector3(xPosition, pipeHeadYPosition);
-        pipeList.Add(pipeHead);
 
         // Set up Pipe body
         Transform pipeBody = Instantiate(GameAssets.GetInstance().pfPipeBody);
@@ -70,7 +99,6 @@ public class Level : MonoBehaviour
             pipeBody.localScale = new Vector3(1, -1, 1);
         }
         pipeBody.position = new Vector3(xPosition, pipeBodyYPosition);
-        pipeList.Add(pipeBody);
 
         SpriteRenderer pipeBodySpriteRenderer = pipeBody.GetComponent<SpriteRenderer>();
         pipeBodySpriteRenderer.size = new Vector2(PIPE_WIDTH, height);
@@ -79,5 +107,36 @@ public class Level : MonoBehaviour
         pipeBodyBoxCollider.size = new Vector2(PIPE_WIDTH, height);
         pipeBodyBoxCollider.offset = new Vector2(0f, height * .5f);
 
+        Pipe pipe = new Pipe(pipeHead, pipeBody);
+        pipeList.Add(pipe);
+    }
+
+    private class Pipe
+    {
+        private Transform pipeHeadTransform;
+        private Transform pipeBodyTransform;
+
+        public Pipe(Transform pipeHeadTransform, Transform pipeBodyTransform)
+        {
+            this.pipeHeadTransform = pipeHeadTransform;
+            this.pipeBodyTransform = pipeBodyTransform;
+        }
+
+        public void Move()
+        {
+            pipeHeadTransform.position += new Vector3(-1, 0, 0) * PIPE_MOVE_SPEED * Time.deltaTime;
+            pipeBodyTransform.position += new Vector3(-1, 0, 0) * PIPE_MOVE_SPEED * Time.deltaTime;
+        }
+
+        public float GetXPosition()
+        {
+            return pipeHeadTransform.position.x;
+        }
+
+        public void DestroySelf()
+        {
+            Destroy(pipeHeadTransform.gameObject);
+            Destroy(pipeBodyTransform.gameObject);
+        }
     }
 }
