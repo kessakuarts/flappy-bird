@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class Level : MonoBehaviour
 {
+    private static Level instance;
+
+    public static Level GetInstance()
+    {
+        return instance;
+    }
+
     private const float CAMERA_ORTHO_SIZE = 50f;
 
     private const float PIPE_WIDTH = 8f;
@@ -12,6 +19,8 @@ public class Level : MonoBehaviour
     private const float PIPE_DESTROY_X_POSITION = -100f;
     private const float PIPE_SPAWN_X_POSITION = 100f;
 
+    private const float BIRD_X_POSITION = 0f;
+
     private List<Pipe> pipeList;
 
     private float pipeSpawnTimer;
@@ -19,7 +28,8 @@ public class Level : MonoBehaviour
 
     private float gapSize;
 
-    private int pipeSpawned;
+    private int pipesSpawned;
+    private int pipesPassedCount;
 
     public enum Difficulty
     {
@@ -31,6 +41,8 @@ public class Level : MonoBehaviour
 
     private void Awake()
     {
+        instance = this;
+
         pipeList = new List<Pipe>();
 
         pipeSpawnTimerMax = 1f;
@@ -76,7 +88,15 @@ public class Level : MonoBehaviour
         for (int i = 0; i < pipeList.Count; i++)
         {
             Pipe pipe = pipeList[i];
+
+            bool isToTheRightOfBird = pipe.GetXPosition() > BIRD_X_POSITION;
             pipe.Move();
+
+            if (isToTheRightOfBird && pipe.GetXPosition() <= BIRD_X_POSITION && pipe.IsBottom())
+            {
+                // Increment score
+                pipesPassedCount++;
+            }
 
             if (pipe.GetXPosition() < PIPE_DESTROY_X_POSITION)
             {
@@ -114,9 +134,9 @@ public class Level : MonoBehaviour
 
     private Difficulty GetDifficulty()
     {
-        if (pipeSpawned >= 30) return Difficulty.Impossible;
-        if (pipeSpawned >= 20) return Difficulty.Hard;
-        if (pipeSpawned >= 10) return Difficulty.Medium;
+        if (pipesSpawned >= 30) return Difficulty.Impossible;
+        if (pipesSpawned >= 20) return Difficulty.Hard;
+        if (pipesSpawned >= 10) return Difficulty.Medium;
 
         return Difficulty.Easy;
     }
@@ -126,10 +146,10 @@ public class Level : MonoBehaviour
         CreatePipe(xPosition, gapY - gapSize * .5f, true);
         CreatePipe(xPosition, CAMERA_ORTHO_SIZE * 2f - gapY - gapSize * .5f, false);
 
-        pipeSpawned++;
+        pipesSpawned++;
         SetDifficulty(GetDifficulty());
 
-        Debug.Log("SPAWNED: " + pipeSpawned + "; Current difficulty: " + GetDifficulty());
+        Debug.Log("SPAWNED: " + pipesSpawned + "; Current difficulty: " + GetDifficulty());
     }
 
     private void CreatePipe(float xPosition, float height, bool createBottom)
@@ -137,11 +157,15 @@ public class Level : MonoBehaviour
         // Set up Pipe head
         Transform pipeHead = Instantiate(GameAssets.GetInstance().pfPipeHead);
         float pipeHeadYPosition;
+        bool isBottom;
+
         if (createBottom)
         {
+            isBottom = true;
             pipeHeadYPosition = -CAMERA_ORTHO_SIZE + height - PIPE_HEAD_HEIGHT * .5f;
         } else
         {
+            isBottom = false;
             pipeHeadYPosition = +CAMERA_ORTHO_SIZE - height + PIPE_HEAD_HEIGHT * .5f;
         }
         pipeHead.position = new Vector3(xPosition, pipeHeadYPosition);
@@ -166,8 +190,18 @@ public class Level : MonoBehaviour
         pipeBodyBoxCollider.size = new Vector2(PIPE_WIDTH, height);
         pipeBodyBoxCollider.offset = new Vector2(0f, height * .5f);
 
-        Pipe pipe = new Pipe(pipeHead, pipeBody);
+        Pipe pipe = new Pipe(pipeHead, pipeBody, isBottom);
         pipeList.Add(pipe);
+    }
+
+    public int GetPipesSpawned()
+    {
+        return pipesSpawned;
+    }
+
+    public int GetPipesPassedCount()
+    {
+        return pipesPassedCount;
     }
 
     private class Pipe
@@ -175,10 +209,18 @@ public class Level : MonoBehaviour
         private Transform pipeHeadTransform;
         private Transform pipeBodyTransform;
 
-        public Pipe(Transform pipeHeadTransform, Transform pipeBodyTransform)
+        private bool isBottom;
+
+        public Pipe(Transform pipeHeadTransform, Transform pipeBodyTransform, bool isBottom)
         {
             this.pipeHeadTransform = pipeHeadTransform;
             this.pipeBodyTransform = pipeBodyTransform;
+            this.isBottom = isBottom;
+        }
+
+        public bool IsBottom()
+        {
+            return isBottom;
         }
 
         public void Move()
