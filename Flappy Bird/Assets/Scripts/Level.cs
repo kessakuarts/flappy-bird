@@ -16,8 +16,8 @@ public class Level : MonoBehaviour
     private const float PIPE_HEAD_HEIGHT = 4f;
     private const float PIPE_MOVE_SPEED = 30f;
 
-    private const float PIPE_DESTROY_X_POSITION = -100f;
-    private const float PIPE_SPAWN_X_POSITION = 100f;
+    private const float PIPE_DESTROY_X_POSITION = -130f;
+    private const float PIPE_SPAWN_X_POSITION = 130f;
 
     private const float BIRD_X_POSITION = 0f;
 
