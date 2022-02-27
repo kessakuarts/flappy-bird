@@ -158,7 +158,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -20, y: -20}
+  m_AnchoredPosition: {x: -40, y: -40}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &106293142
@@ -520,7 +520,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1180439410}
   - component: {fileID: 1180439412}
-  - component: {fileID: 1180439411}
   m_Layer: 0
   m_Name: UICamera
   m_TagString: Untagged
@@ -543,14 +542,6 @@ Transform:
   m_Father: {fileID: 1423892552}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1180439411
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1180439409}
-  m_Enabled: 1
 --- !u!20 &1180439412
 Camera:
   m_ObjectHideFlags: 0

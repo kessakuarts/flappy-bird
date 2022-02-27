@@ -31,12 +31,20 @@ public class Level : MonoBehaviour
     private int pipesSpawned;
     private int pipesPassedCount;
 
+    private State state;
+
     public enum Difficulty
     {
         Easy,
         Medium,
         Hard,
         Impossible,
+    }
+
+    private enum State
+    {
+        Playing,
+        BirdDead
     }
 
     private void Awake()
@@ -47,20 +55,27 @@ public class Level : MonoBehaviour
 
         pipeSpawnTimerMax = 1f;
         SetDifficulty(Difficulty.Easy);
+
+        state = State.Playing;
     }
 
     private void Start()
     {
-        //CreatePipe(20f, 50f, true);
-        //CreatePipe(20f, 50f, false);
-
-        //CreateGapPipes(50f, 20f, 20f);
+        Bird.GetInstance().OnDied += Bird_OnDied;
     }
 
     private void Update()
     {
-        HandlePipeMovement();
-        HandlePipeSpawning();
+        if (state == State.Playing)
+        {
+            HandlePipeMovement();
+            HandlePipeSpawning();
+        }
+    }
+
+    private void Bird_OnDied(object sender, System.EventArgs e)
+    {
+        state = State.BirdDead;
     }
 
     private void HandlePipeSpawning()
