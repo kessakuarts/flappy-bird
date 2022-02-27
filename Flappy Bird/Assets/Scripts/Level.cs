@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 
 public class Level : MonoBehaviour
 {
+    //private static Timer timer = new Timer(1000) { Enabled = false };
     private static Level instance;
 
     public static Level GetInstance()
@@ -21,6 +23,8 @@ public class Level : MonoBehaviour
 
     private const float BIRD_X_POSITION = 0f;
 
+    private const float RESTART_SCENE_SEC = 1f;
+
     private List<Pipe> pipeList;
 
     private float pipeSpawnTimer;
@@ -32,6 +36,8 @@ public class Level : MonoBehaviour
     private int pipesPassedCount;
 
     private State state;
+
+    private float currentRestartSec;
 
     public enum Difficulty
     {
@@ -57,6 +63,8 @@ public class Level : MonoBehaviour
         SetDifficulty(Difficulty.Easy);
 
         state = State.Playing;
+
+        currentRestartSec = RESTART_SCENE_SEC;
     }
 
     private void Start()
@@ -70,13 +78,30 @@ public class Level : MonoBehaviour
         {
             HandlePipeMovement();
             HandlePipeSpawning();
+            return;
         }
+
+        currentRestartSec -= Time.deltaTime;
+
+        if (currentRestartSec <= 0f)
+            UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     }
 
     private void Bird_OnDied(object sender, System.EventArgs e)
     {
         state = State.BirdDead;
+        //UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+        //timer.Enabled = true;
+        //timer.Stop();
+        //timer.Start();
     }
+
+    //private void RestartScene(object sender, ElapsedEventArgs e)
+    //{
+    //    timer.Stop();
+    //    Debug.Log("DONE!");
+    //    UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+    //}
 
     private void HandlePipeSpawning()
     {
