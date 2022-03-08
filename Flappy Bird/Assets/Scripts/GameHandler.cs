@@ -6,6 +6,8 @@ public class GameHandler : MonoBehaviour
     {
         //QualitySettings.vSyncCount = 0;
         //Application.targetFrameRate = Screen.currentResolution.refreshRate;
+        //Application.targetFrameRate = -1;
+
     }
 
     private void Start()

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Timers;
 using UnityEngine;
 
 public class Level : MonoBehaviour
@@ -37,7 +36,7 @@ public class Level : MonoBehaviour
 
     private State state;
 
-    private float currentRestartSec;
+    private float timer;
 
     public enum Difficulty
     {
@@ -49,6 +48,7 @@ public class Level : MonoBehaviour
 
     private enum State
     {
+        WaitingToStart,
         Playing,
         BirdDead
     }
@@ -62,44 +62,49 @@ public class Level : MonoBehaviour
         pipeSpawnTimerMax = 1f;
         SetDifficulty(Difficulty.Easy);
 
-        state = State.Playing;
+        state = State.WaitingToStart;
 
-        currentRestartSec = RESTART_SCENE_SEC;
+        timer = RESTART_SCENE_SEC;
     }
 
     private void Start()
     {
         Bird.GetInstance().OnDied += Bird_OnDied;
+        Bird.GetInstance().OnStartedPlaying += Bird_OnStartedPlaying;
     }
 
     private void Update()
     {
-        if (state == State.Playing)
+        switch (state)
         {
-            HandlePipeMovement();
-            HandlePipeSpawning();
-            return;
+            case State.WaitingToStart:
+                break;
+            case State.Playing:
+                HandlePipeMovement();
+                HandlePipeSpawning();
+                break;
+            case State.BirdDead:
+                timer -= Time.deltaTime;
+
+                if (timer <= 0f)
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+                break;
         }
-
-        currentRestartSec -= Time.deltaTime;
-
-        if (currentRestartSec <= 0f)
-            UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     }
 
     private void Bird_OnDied(object sender, System.EventArgs e)
     {
         state = State.BirdDead;
-        //UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
-        //timer.Enabled = true;
-        //timer.Stop();
-        //timer.Start();
     }
 
-    //private void RestartScene(object sender, ElapsedEventArgs e)
+    private void Bird_OnStartedPlaying(object sender, System.EventArgs e)
+    {
+        state = State.Playing;
+    }
+
+    //private IEnumerator<WaitForSeconds> RestartScene(float delay)
     //{
-    //    timer.Stop();
-    //    Debug.Log("DONE!");
+    //    yield return new WaitForSeconds(delay);
     //    UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
     //}
 
