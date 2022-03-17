@@ -22,7 +22,7 @@ public class Level : MonoBehaviour
 
     private const float BIRD_X_POSITION = 0f;
 
-    private const float RESTART_SCENE_SEC = 1f;
+    //private const float RESTART_SCENE_SEC = 1f;
 
     private List<Pipe> pipeList;
 
@@ -36,7 +36,7 @@ public class Level : MonoBehaviour
 
     private State state;
 
-    private float timer;
+    //private float timer;
 
     public enum Difficulty
     {
@@ -64,7 +64,7 @@ public class Level : MonoBehaviour
 
         state = State.WaitingToStart;
 
-        timer = RESTART_SCENE_SEC;
+        //timer = RESTART_SCENE_SEC;
     }
 
     private void Start()
@@ -83,12 +83,12 @@ public class Level : MonoBehaviour
                 HandlePipeMovement();
                 HandlePipeSpawning();
                 break;
-            case State.BirdDead:
-                timer -= Time.deltaTime;
+            //case State.BirdDead:
+            //    timer -= Time.deltaTime;
 
-                if (timer <= 0f)
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
-                break;
+            //    if (timer <= 0f)
+            //        UnityEngine.SceneManagement.SceneManager.LoadScene("GameScene");
+            //    break;
         }
     }
 
@@ -194,7 +194,7 @@ public class Level : MonoBehaviour
         pipesSpawned++;
         SetDifficulty(GetDifficulty());
 
-        Debug.Log("SPAWNED: " + pipesSpawned + "; Current difficulty: " + GetDifficulty());
+        //Debug.Log("SPAWNED: " + pipesSpawned + "; Current difficulty: " + GetDifficulty());
     }
 
     private void CreatePipe(float xPosition, float height, bool createBottom)
